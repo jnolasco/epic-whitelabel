@@ -1,4 +1,6 @@
 <div align="center">
+  <h1>Epic Fit Challenge - Starter App</h1>
+  <p>Built on top of:</p>
   <img src="documentation/rnsk-logo.jpg" alt="React Native Expo Starter Kit" width="400" />
   <p></p>
   <h1>React Native (Expo) App</h1>
