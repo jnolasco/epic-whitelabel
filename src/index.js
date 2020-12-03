@@ -2,14 +2,14 @@ import React from 'react';
 import * as Font from 'expo-font';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
-import { Router, Stack } from 'react-native-router-flux';
 import { PersistGate } from 'redux-persist/es/integration/react';
-
+import {Text} from 'react-native'
 import { Root, StyleProvider } from 'native-base';
 import getTheme from '../native-base-theme/components';
 import theme from '../native-base-theme/variables/commonColor';
 
-import Routes from './routes/index';
+import Router from './routes/router';
+
 import Loading from './components/UI/Loading';
 
 class App extends React.Component {
@@ -41,9 +41,7 @@ class App extends React.Component {
         <Provider store={store}>
           <PersistGate loading={<Loading />} persistor={persistor}>
             <StyleProvider style={getTheme(theme)}>
-              <Router>
-                <Stack key="root">{Routes}</Stack>
-              </Router>
+              <Router />
             </StyleProvider>
           </PersistGate>
         </Provider>

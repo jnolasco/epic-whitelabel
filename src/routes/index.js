@@ -1,3 +1,8 @@
+/* this users react-native-router-flux which I'm abandoning because it's based on
+react-navigation 4.x. react-navigation is now on 5.x and it operates basically the same as RNRF.
+no sense in adding extra abstraction layers - jn
+ */
+
 import React from 'react';
 import { Scene, Tabs, Stack } from 'react-native-router-flux';
 import { Icon } from 'native-base';
