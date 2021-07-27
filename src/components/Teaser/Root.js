@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Container, Content, Text, H1, H2, H3, Button, Header
+  Box, Text, Heading, Button
 } from 'native-base';
 import {
   StyleSheet
@@ -20,11 +20,11 @@ const TeaserRoot = () => {
   const navigation = useNavigation();
 
   return (
-    <Container>
-      <Header>
-        <H1>StretchAffect</H1>
-      </Header>
-      <Content padder bounces={false}>
+    <Box flex={1} mx={5} safeArea>
+
+        <Heading>StretchAffect</Heading>
+
+      <Box>
         <Spacer size={30}/>
 
         <Text>
@@ -33,11 +33,12 @@ const TeaserRoot = () => {
           {' '}
         </Text>
 
-        <Button light title="login" style={styles.button} onPress={() => navigation.navigate('TestFlight')}>
-          <Text style={styles.buttonText}>Back</Text>
+        <Button light title="login" style={styles.button}
+                onPress={() => navigation.navigate('Dashboard', {screen: "Workout"})}>
+          Do a workout
         </Button>
-      </Content>
-    </Container>
+      </Box>
+    </Box>
   );
 }
 

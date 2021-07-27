@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {
-  Container, Content, Text, H1, H2, H3, Button, Header, Footer, Icon
+  Box, Center, Text, Button, VStack
 } from 'native-base';
 import {
   StyleSheet, ImageBackground, View, Dimensions, Image, TouchableOpacity
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
 
-   flexDirection:"column"
+    flexDirection: "column"
   }
 });
 
@@ -53,32 +53,33 @@ const TestFlight = () => {
 
   return (
     <ImageBackground style={styles.image} source={bg}>
-      <Container style={[styles.container,]}>
-        <Content padder bounces={false} contentContainerStyle={styles.content}>
-          <View style={{flex:1, alignItems: "center", overflow: "hidden", paddingTop: 150, zIndex: 10}}>
-            <Image style={{width:"80%", height:"80%"}} source={require('../../../assets/stretch-affect-png.png')} resizeMode={'contain'}
+      <Box flex={1} mx={5}>
+        <Box padder bounces={false} contentContainerStyle={styles.content}>
+          <Center>
+            <Image style={{width: "80%", height: "80%"}} source={require('../../../assets/stretch-affect-png.png')}
+                   resizeMode={'contain'}
             />
-          </View>
-          <View
-            style={{flex: 1, marginTop:50}}>
-            <Button large primary title="jump" style={[styles.fullWidth, styles.button]} onPress={() => {
-              primaryClick.replayAsync();
-              setTimeout(() => navigation.navigate('Teaser'), 200)
-            }}>
-              <Text style={[styles.buttonText]}>Evaluate my Flexibility</Text>
-            </Button>
-            <Button bordered light title="jump" style={[styles.fullWidth, styles.button]}
-                    onPress={() => {
-                      primaryClick.replayAsync();
-                      setTimeout(()=> navigation.navigate('Main'), 200);
-                    }
-                    }>
-              <Text style={[styles.buttonText]}>Access Video Content</Text>
-            </Button>
-          </View>
-
-        </Content>
-      </Container>
+          </Center>
+          <Box>
+            <VStack space={1}>
+              <Button onPress={() => {
+                primaryClick.replayAsync();
+                setTimeout(() => navigation.navigate('Teaser'), 200)
+              }}>
+                Evaluate my Flexibility
+              </Button>
+              <Button
+                onPress={() => {
+                  primaryClick.replayAsync();
+                  setTimeout(() => navigation.navigate('Main'), 200);
+                }
+                }>
+                Access Video Content
+              </Button>
+            </VStack>
+          </Box>
+        </Box>
+      </Box>
     </ImageBackground>
   );
 }

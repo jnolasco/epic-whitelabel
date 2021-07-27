@@ -1,5 +1,5 @@
 import React from 'react';
-import {Icon, ScrollableTab, Text} from 'native-base';
+import {Icon} from 'native-base';
 import DefaultProps from '../constants/navigation';
 import AppConfig from '../constants/config';
 
@@ -12,6 +12,10 @@ import {
   TestFlightContainer,
   DashboardRootContainer,
 } from '../containers';
+
+import {
+  Workout
+} from "../components/Dashboard/Workout"
 
 const RootStack = createStackNavigator();
 const MainTab = createBottomTabNavigator();
@@ -34,6 +38,7 @@ const Main = () => (
 const Dashboard = () => (
   <DashboardStack.Navigator headerMode="none">
     <DashboardStack.Screen name="DashboardRoot" component={DashboardRootContainer} />
+    <DashboardStack.Screen name="Workout" component={Workout} />
   </DashboardStack.Navigator>
 )
 
@@ -42,6 +47,7 @@ const Router = () => (
     <RootStack.Navigator headerMode="screen">
       <RootStack.Screen options={{headerShown: false}} name="TestFlight" component={TestFlightContainer}/>
       <RootStack.Screen options={{headerShown: false}} name="Teaser" component={TeaserRootContainer}/>
+      <RootStack.Screen options={{headerShown: false}} name="Dashboard" component={Dashboard}/>
       <RootStack.Screen options={{headerShown: true}} name="Main" component={Main} />
     </RootStack.Navigator>
   </NavigationContainer>

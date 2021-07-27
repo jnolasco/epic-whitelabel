@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, {useState, useCallback, useRef} from "react";
 import {
-  Container, Content, Text, H1, H2, H3, Button, Header, Card, CardItem, Body, CardSwiper
+  Box, Text, Button, Heading
 } from 'native-base';
 import {
   StyleSheet
@@ -10,7 +10,6 @@ import Spacer from '../UI/Spacer';
 
 import {useNavigation} from '@react-navigation/native';
 import YoutubePlayer from "react-native-youtube-iframe";
-
 
 const styles = StyleSheet.create({
   button: {},
@@ -34,71 +33,57 @@ const DashboardRoot = () => {
   }, []);
 
 
-
   return (
-    <Container>
+    <Box flex={1} safeArea mx={5}>
 
-      <Content>
-        <Card>
-          <CardItem header>
-            <H1>Welcome to Stretch Affect</H1>
+      <Box>
+        <Heading>Welcome to Stretch Affect</Heading>
+      </Box>
+      <Box>
+      </Box>
 
-          </CardItem>
-          <CardItem>
-            <Body>
-              <Text>
-                <H2>Full-bleed Workout Image</H2>
-              </Text>
-            </Body>
-          </CardItem>
-          <CardItem footer>
-            <Button light onPress={() => navigation.navigate("TestFlight")}><Text>Back</Text></Button>
-          </CardItem>
-        </Card>
 
-        <Content padder>
-          <YoutubePlayer
-            height={300}
-            play={playing}
-            videoId={"IaGqTFcj-io"}
-            onChangeState={onStateChange}
-          />
+      <YoutubePlayer
+        height={300}
+        play={playing}
+        videoId={"IaGqTFcj-io"}
+        onChangeState={onStateChange}
+      />
 
-          <Card>
-            <CardItem header>
-              <Text>Challenge Title</Text>
-            </CardItem>
-            <CardItem>
-              <Body>
-                <Text>
-                  Image
-                </Text>
-              </Body>
-            </CardItem>
-            <CardItem footer>
-              <Button light><Text>Go</Text></Button>
-            </CardItem>
-          </Card>
-          <Card>
-            <CardItem header>
-              <Text>Challenge Title</Text>
-            </CardItem>
-            <CardItem>
-              <Body>
-                <Text>
-                  Image
-                </Text>
-              </Body>
-            </CardItem>
-            <CardItem footer>
-              <Button light><Text>Go</Text></Button>
-            </CardItem>
-          </Card>
+      <Box>
+        <Box header>
+          <Text>Challenge Title</Text>
+        </Box>
+        <Box>
+          <Box>
+            <Text>
+              Image
+            </Text>
+          </Box>
+        </Box>
+        <Box footer>
+          <Button light>Go</Button>
+        </Box>
+      </Box>
+      <Box>
+        <Box header>
+          <Text>Challenge Title</Text>
+        </Box>
+        <Box>
+          <Box>
+            <Text>
+              Image
+            </Text>
+          </Box>
+        </Box>
+        <Box footer>
+          <Button light>Go</Button>
+        </Box>
+      </Box>
 
-        </Content>
-      </Content>
 
-    </Container>
+    </Box>
+
   );
 }
 

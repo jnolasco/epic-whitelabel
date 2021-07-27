@@ -3,10 +3,7 @@ import * as Font from 'expo-font';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/es/integration/react';
-import {Text} from 'react-native'
-import { Root, StyleProvider } from 'native-base';
-import getTheme from '../native-base-theme/components';
-import theme from '../native-base-theme/variables/commonColor';
+import { NativeBaseProvider } from 'native-base';
 
 import Router from './routes/router';
 
@@ -19,12 +16,6 @@ class App extends React.Component {
   }
 
   async componentDidMount() {
-    await Font.loadAsync({
-      Roboto: require('native-base/Fonts/Roboto.ttf'),
-      Roboto_medium: require('native-base/Fonts/Roboto_medium.ttf'),
-      Ionicons: require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf'),
-    });
-
     this.setState({ loading: false });
   }
 
@@ -37,15 +28,13 @@ class App extends React.Component {
     }
 
     return (
-      <Root>
         <Provider store={store}>
           <PersistGate loading={<Loading />} persistor={persistor}>
-            <StyleProvider style={getTheme(theme)}>
+            <NativeBaseProvider>
               <Router />
-            </StyleProvider>
+            </NativeBaseProvider>
           </PersistGate>
         </Provider>
-      </Root>
     );
   }
 }
