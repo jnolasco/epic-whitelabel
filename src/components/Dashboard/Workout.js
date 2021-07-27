@@ -21,7 +21,7 @@ export const Workout = (props) => {
     "completionMetric": "reps",
     "name": "headYaw",
     "requirements": {
-      "reps": 10,
+      "reps": 1,
     },
     "timeEstimate": 2,
   }
