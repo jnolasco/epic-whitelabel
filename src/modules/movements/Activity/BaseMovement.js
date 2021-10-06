@@ -50,6 +50,8 @@ export default class BaseMovement {
   ) {
     if (!requirements)
       throw "activity requires requirements. reqs should (probably) contain reps";
+    if (requiredJoints.length < 4)
+      throw "must have at least 4 required joints to form a bounding box";
     if (!telemetry)
       throw "no telemetry provided to module";
     if (!renderer)
@@ -57,6 +59,7 @@ export default class BaseMovement {
     this.telemetry = telemetry;
     this.engine = PoseEngine.MOBILENET;
     this.renderer = renderer;
+    this.orientationWarningFrames = 0; // if you hit 10 frames then fail the tilt sensor, necessary to debounce occasional bad data.
     this.boundingBox = {} // bounding box, for now defaults to 5% off the edges.
     this.createBoundingBox(telemetry.options.tensorWidth, telemetry.options.tensorHeight);
 
@@ -64,11 +67,16 @@ export default class BaseMovement {
     this.requirements = requirements;
     console.log("REQUIREMENT", this.requirements);
 
-    this.sound = new Audio.Sound()
-    this.sound.loadAsync(
+    this.repChime = new Audio.Sound()
+    this.repChime.loadAsync(
       require('./assets/ding.wav')
     )
 
+    this.tickingSound = new Audio.Sound()
+    this.tickingSound.loadAsync(
+      require('./assets/ticking.mp3')
+    )
+    this.isTicking = false;
 
     this.onPhaseChange = onPhaseChange;
     this.requiredJoints = requiredJoints;
@@ -80,6 +88,15 @@ export default class BaseMovement {
 
     // list of all states that can be transitioned to
     this.states = []
+
+    this.tutorial = {
+      introText: "",
+      headerImage: "...",
+      steps: []
+    };
+
+
+    this.coachQueue = 0;
 
     // tracking the actual movementTask
     this.current = {
@@ -106,7 +123,18 @@ export default class BaseMovement {
   }
 
   playRepSound() {
-    this.sound.replayAsync();
+    this.repChime.replayAsync();
+  }
+
+  toggleTicking(setActive) {
+    if (setActive) {
+      this.tickingSound.playAsync()
+      this.isTicking = true;
+    } else {
+      this.tickingSound.pauseAsync()
+      this.isTicking = false;
+    }
+
   }
 
   // normalizes value to a 0-100 scale
@@ -226,10 +254,22 @@ export default class BaseMovement {
     const pitchExitFactor = checkExit ? 4 : 0;
     const rollExitFactor = checkExit ? 2 : 0;
 
-    return (
+    const orientationCheckSuccess =
       pitch > MIN_PITCH_ANGLE - pitchExitFactor &&
-      pitch < MAX_PITCH_ANGLE + pitchExitFactor
-    )
+      pitch < MAX_PITCH_ANGLE + pitchExitFactor;
+
+    if (orientationCheckSuccess) {
+      this.orientationWarningFrames = 0
+    }
+    {
+      this.orientationWarningFrames++;
+    }
+
+    // either it passes or it doesn't pass but we haven't exhausted our warning frames
+    // we give it a chance to fail a few frames before we fail it totally.
+    const finalSuccess = orientationCheckSuccess || (!orientationCheckSuccess && this.orientationWarningFrames < 10)
+
+    return finalSuccess;
   }
 
   // todo: this probably should be in telemetry
@@ -296,10 +336,10 @@ export default class BaseMovement {
     return this.requiredJoints.reduce((result, item) => {
       const j = jointArray[item.id];
       return {
-        minX: (j.position.x < result.minX) ? j.position.x : result.minX,
-        maxX: (j.position.x > result.maxX) ? j.position.x : result.maxX,
-        minY: (j.position.y < result.minY) ? j.position.y : result.minY,
-        maxY: (j.position.y > result.maxY) ? j.position.y : result.maxY,
+        minX: (j.x < result.minX) ? j.x : result.minX,
+        maxX: (j.x > result.maxX) ? j.x : result.maxX,
+        minY: (j.y < result.minY) ? j.y : result.minY,
+        maxY: (j.y > result.maxY) ? j.y : result.maxY,
       }
     }, {
       minX: Number.POSITIVE_INFINITY, maxX: Number.NEGATIVE_INFINITY,
@@ -344,12 +384,20 @@ export default class BaseMovement {
 
   // audio coaching
   coach(text, isComplete = false) {
+    this.coachQueue++;
     if (isComplete) {
-      this.playRepSound();
-      setTimeout(() => Speech.speak(text), 500);
+      if (this.coachQueue < 2) { // kludge to prevent audio overload
+        this.playRepSound();
+        setTimeout(() => Speech.speak(text), 500);
+      }
+      this.coachQueue--
     } else {
-      Speech.speak(text);
+      if (this.coachQueue < 2) { // kludge to prevent audio overload
+        Speech.speak(text);
+      }
+      this.coachQueue--
     }
+
   }
 
   processFrame() {
@@ -361,6 +409,7 @@ export default class BaseMovement {
 
     switch (phase) {
       case MovementPhase.PENDING_DEVICE_ORIENTATION:
+        if (this.isTicking) this.toggleTicking(false);
         /* test: phone orientation correct => promote */
         /* update: this is handled in exercise main by a component */
         this.showMarkers = false;
@@ -374,6 +423,7 @@ export default class BaseMovement {
 
         break;
       case MovementPhase.PENDING_INBOUNDS:
+        if (this.isTicking) this.toggleTicking(false);
         /* test: orientation moved => demote */
         if (!this.checkDeviceOrientation(true)) {
           this.setPhase(MovementPhase.PENDING_DEVICE_ORIENTATION);
@@ -405,6 +455,7 @@ export default class BaseMovement {
         }
 
         if (!this.checkReadyPositionEnter()) {
+          if (this.isTicking) this.toggleTicking(false);
           this._startInbound = Date.now(); // reset time
           return;
         }
@@ -424,8 +475,10 @@ export default class BaseMovement {
 
         /* test: inbounds timer exceeds INBOUNDS_TIMER => promote to ACTIVE */
         const timerMs = Date.now() - this._startInbound;
+        if (!this.isTicking) this.toggleTicking(true);
         this.addMsg((((INBOUNDS_TIMER - timerMs) / 1000).toFixed(2)) + " sec");
         if (timerMs > INBOUNDS_TIMER) { // skip countdown for now
+          this.toggleTicking(false)
           this.setPhase(MovementPhase.ACTIVE);
         }
         break;

@@ -38,11 +38,20 @@ const ExerciseUI = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical:5
   },
-
-  uiMsgSmall: {
+  uiMsgMedium: {
     fontSize: 30,
     color: "#FFF",
     fontWeight: "bold",
+    margin: "auto",
+    marginBottom: 5,
+    textAlign: "center",
+    borderRadius: 5,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 5
+  },
+  uiMsgSmall: {
+    fontSize: 20,
+    color: "#FFF",
     margin: "auto",
     marginBottom: 5,
     textAlign: "center",

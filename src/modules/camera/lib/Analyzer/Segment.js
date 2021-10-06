@@ -4,8 +4,9 @@ import {BodyPartType} from "../../common";
 export default class Segment extends BaseAnalyzer {
   constructor() {
     super();
-  }
 
+
+  }
   /*
    segment: { // segments are always ratio compare
      s1: 201,
@@ -18,6 +19,8 @@ export default class Segment extends BaseAnalyzer {
 
   // TODO COMPUTE SEGMENT DELTA DYNAMICALLY?
   // TODO get min/max since last baseline
+
+
 
   analyze(telemetry, task) {
     let segment = task;

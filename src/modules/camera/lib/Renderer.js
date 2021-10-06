@@ -12,7 +12,8 @@ export default class Renderer {
   constructor(options = {}) {
     // check for invalid options and reject if incomplete
     if (!options.screenHeight || !options.screenWidth) {
-      console.warn("Renderer: screenHeight:int or screenWidth:int not specified in options.");
+      // throw "Renderer: screenHeight:int or screenWidth:int not specified in options.";
+      console.log("renderer init: ", options);
     } else {
       console.log(`Renderer: Created: ${options.tensorWidth}x${options.tensorHeight} => ${options.screenWidth}x${options.screenHeight}`);
     }

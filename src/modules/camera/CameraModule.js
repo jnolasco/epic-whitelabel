@@ -2,9 +2,16 @@ import React, {Component} from 'react';
 import {Camera} from "expo-camera";
 import {Box, Center, ZStack, Button, Icon} from "native-base";
 import {Dimensions, View, Text, SafeAreaView} from 'react-native';
-import * as tf from '@tensorflow/tfjs';
-import * as posenet from '@tensorflow-models/posenet';
-import '@tensorflow/tfjs-react-native';
+
+//import * as tf from '@tensorflow/tfjs';
+//import * as posenet from '@tensorflow-models/posenet';
+
+import * as poseDetection from '@tensorflow-models/pose-detection';
+
+import * as tf from '@tensorflow/tfjs-core';
+import '@tensorflow/tfjs-backend-webgl';
+
+//import '@tensorflow/tfjs-react-native';
 import {cameraWithTensors} from '@tensorflow/tfjs-react-native';
 import {ExerciseUI} from "./style/";
 import {MovementPhase, Orientation, PoseEngine, UIMode} from "../common";
@@ -121,16 +128,20 @@ export class CameraModule extends Component {
   }
 
   initializeTf = async () => {
+
     await tf.ready();
     console.log("initializeTf: tensorflow is ready ", tf.getBackend());
     tf.disposeVariables();
 
     const {tensorWidth, tensorHeight, orientation} = this.telemetry.options;
     const {engine, layout} = this.state;
-    const model = await posenet.load({
+    /*const model = await posenet.load({
       ...engine,
       inputResolution: {width: tensorWidth, height: tensorHeight},
     })
+    */
+    const model = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
+
     console.log("initializeTf: posenet is ready ", engine);
 
     this.setState({model: model, tfReady: true});
@@ -177,6 +188,7 @@ export class CameraModule extends Component {
 
   getTelemetry(orientation) {
     const options = this.getGeometry(orientation);
+    console.log("screen geometry:", options);
     return new FitTelemetry(options)
   }
 
@@ -298,12 +310,23 @@ export class CameraModule extends Component {
         if (nextImageTensor) {*/
         const nextImageTensor = images.next().value;
         if (nextImageTensor) {
-          let t0 = Date.now();
+          let t0 = new Date();
+          const pose = await model.estimatePoses(nextImageTensor);
+          /*
           const pose = await model.estimateSinglePose(nextImageTensor, {
             flipHorizontal: false
-          });
-          let t1 = Date.now();
+          });*/
+
+
+          let t1 = new Date();
+
+          if (this.tick % 50 === 0) {
+            console.log(t1.getTime() - t0.getTime());
+            //console.log(pose);
+          }
+
           tf.dispose([nextImageTensor]);
+
 
           // EXERCISE MOVEMENT PATHWAY
           if (uiMode == UIMode.ACTIVE_MOVEMENT) {
@@ -316,7 +339,6 @@ export class CameraModule extends Component {
               //this.processMovementDots();
             }
           }
-          /*}*/
         }
       }
 
@@ -395,7 +417,6 @@ export class CameraModule extends Component {
     let movementName = movementHandler ? movementHandler.name : "(none)";
 
 
-
     return (
       <ZStack flex={1}>
         <TensorCamera
@@ -415,13 +436,26 @@ export class CameraModule extends Component {
         />
 
         {/* dots */}
-        {(this.movement && this.movement.showMarkers) && (
+        {(this.movement && this.movement.showMarkers && this.movement.telemetry) && (
           <View style={styles.poseOverlay}>
             {
               this.movement.requiredJoints.map((item, index) => {
                 const t = this.movement.telemetry;
                 const r = this.movement.renderer;
-                const scaled = r.scalePosition(t.currentPose.joints[item.id].position);
+                let scaled;
+                try {
+                  scaled = r.scalePosition(
+                    {
+                      x: t.currentPose.joints[item.id].x,
+                      y: t.currentPose.joints[item.id].y
+                    });
+                }
+                catch (ex)
+                {
+                  console.log("couldn't find joint ", ex);
+                  return <View/>
+                }
+
                 return (
                   <View
                     key={`track-${index}`}
@@ -487,7 +521,7 @@ export class CameraModule extends Component {
               {this.movement.current.messages.map((item, index) => {
                 if (item.className !== "debug" || (item.className === "debug" && this.state.showDebug)) {
                   return (
-                    <Text key={`msg${index}`} style={styles.uiMsgSmall}>
+                    <Text key={`msg${index}`} style={item.className === "small" ? styles.uiMsgSmall : styles.uiMsgMedium}>
                       {item.message}
                     </Text>
                   )
@@ -499,9 +533,12 @@ export class CameraModule extends Component {
 
         {uiMode === UIMode.ACTIVE_MOVEMENT && this.movement.current.phase === MovementPhase.ACTIVE && (
           <>
-            {this.movement.gauges.includes("CircularGauge") && <CircularGauge orientation={this.movement.renderer} fill={this.movement.current.gauge}/>}
-            {this.movement.gauges.includes("HBarGauge") && <HBarGauge orientation={this.movement.renderer} fill={this.movement.current.gauge}/>}
-            {this.movement.gauges.includes("VBarGauge") && <VBarGauge orientation={this.movement.renderer} fill={this.movement.current.gauge}/>}
+            {this.movement.gauges.includes("CircularGauge") &&
+            <CircularGauge orientation={this.movement.renderer} fill={this.movement.current.gauge}/>}
+            {this.movement.gauges.includes("HBarGauge") &&
+            <HBarGauge orientation={this.movement.renderer} fill={this.movement.current.gauge}/>}
+            {this.movement.gauges.includes("VBarGauge") &&
+            <VBarGauge orientation={this.movement.renderer} fill={this.movement.current.gauge}/>}
           </>
         )}
 

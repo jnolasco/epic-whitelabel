@@ -41,7 +41,7 @@ const cues = {
 
 const TELEMETRY_ORIENTATION = Orientation.PORTRAIT;
 const UI_ORIENTATION = Orientation.PORTRAIT;
-const MOVEMENT_NAME = "Head Tilt";
+const MOVEMENT_NAME = "Neck Side Bend";
 const MOVEMENT_TYPE = MovementTypes.BENCHMARK_POSE;
 const MIN_COMPRESSION_RATIO = 0.6;
 const MIN_EXPANSION_RATIO = 0.85;
@@ -194,6 +194,10 @@ export default class HeadRoll extends BaseMovement {
 
           if (stats.eyelineAngle < 100) {
             this.globals.timer = Date.now();
+            if (this.isTicking) this.toggleTicking(false);
+          }
+          else {
+            if (!this.isTicking) this.toggleTicking(true);
           }
 
           this.addMsg(((holdTime - (Date.now() - this.globals.timer)) / 1000).toFixed(1) + " sec");
@@ -202,6 +206,7 @@ export default class HeadRoll extends BaseMovement {
         },
         onExit: () => {
           //nothing
+          this.toggleTicking(false);
         },
       },
       {
@@ -250,6 +255,10 @@ export default class HeadRoll extends BaseMovement {
           const stats = this._getStats();
           if (stats.eyelineAngle > 80) {
             this.globals.timer = Date.now();
+            if (this.isTicking) this.toggleTicking(false);
+          }
+          else {
+            if (!this.isTicking) this.toggleTicking(true);
           }
           this.addMsg(((holdTime - (Date.now() - this.globals.timer)) / 1000).toFixed(1) + " sec");
           this.current.gauge = -((stats.eyelineAngle - 90) / 60) * 100;
@@ -257,6 +266,7 @@ export default class HeadRoll extends BaseMovement {
         },
         onExit: () => {
           // nothing
+          this.toggleTicking(false);
         },
       },
       {

@@ -41,7 +41,7 @@ const cues = {
 
 const TELEMETRY_ORIENTATION = Orientation.PORTRAIT;
 const UI_ORIENTATION = Orientation.PORTRAIT;
-const MOVEMENT_NAME = "Head Turn";
+const MOVEMENT_NAME = "Cervical Rotation";
 const MOVEMENT_TYPE = MovementTypes.BENCHMARK_POSE;
 const MIN_COMPRESSION_RATIO = 0.6;
 const MIN_EXPANSION_RATIO = 0.85;
@@ -101,6 +101,16 @@ export default class HeadYaw extends BaseMovement {
     }*/
   }
 
+  detectRange(value) {
+    if (value < 15) {
+      return "#861212"
+    }
+    if (value < 30) {
+      return "#f6b143"
+    }
+    return "#5d9e5e"
+  }
+
   getReport() {
     const noseMin = Math.round(this.globals.reps[0].left.noseMinimum * 100);
     const noseMax = Math.round(this.globals.reps[0].right.noseMaximum * 100);
@@ -121,15 +131,16 @@ export default class HeadYaw extends BaseMovement {
               {this.globals.reps.length}
             </Text>
           </View>
-        </View>
+
 
         <View style={{marginBottom: 20, alignItems: "center", textAlign: "center", width: "100%"}}>
           <Text style={{fontSize: 24}}>
             Left
           </Text>
-          <Text style={{fontSize: 24, fontWeight: "bold"}}>
+          <Text style={{fontSize: 24, fontWeight: "bold", color: this.detectRange(50 - noseMin)}}>
             {50 - noseMin}% from center
           </Text>
+
         </View>
 
 
@@ -137,9 +148,10 @@ export default class HeadYaw extends BaseMovement {
           <Text style={{fontSize: 24}}>
             Right
           </Text>
-          <Text style={{fontSize: 24, fontWeight: "bold"}}>
+          <Text style={{fontSize: 24, fontWeight: "bold", color: this.detectRange(50 - noseMin)}}>
             {noseMax - 50}% from center
           </Text>
+        </View>
         </View>
       </View>
     );
@@ -199,6 +211,10 @@ export default class HeadYaw extends BaseMovement {
 
           if (stats.noseNormalized > .35) {
             this.globals.timer = Date.now();
+            if (this.isTicking) this.toggleTicking(false);
+          }
+          else {
+            if (!this.isTicking) this.toggleTicking(true);
           }
 
           this.addMsg(((holdTime - (Date.now() - this.globals.timer)) / 1000).toFixed(1) + " sec");
@@ -212,6 +228,7 @@ export default class HeadYaw extends BaseMovement {
         },
         onExit: () => {
           //nothing
+          this.toggleTicking(false);
         },
       },
       {
@@ -263,6 +280,10 @@ export default class HeadYaw extends BaseMovement {
           const stats = this._getStats();
           if (stats.noseNormalized < .65) {
             this.globals.timer = Date.now();
+            if (this.isTicking) this.toggleTicking(false);
+          }
+          else {
+            if (!this.isTicking) this.toggleTicking(true);
           }
           this.addMsg(((holdTime - (Date.now() - this.globals.timer)) / 1000).toFixed(1) + " sec");
           this.addMsg(Math.round(stats.noseNormalized * 100), "debug");
@@ -276,6 +297,7 @@ export default class HeadYaw extends BaseMovement {
         },
         onExit: () => {
           // nothing
+          this.toggleTicking(false);
         },
       },
       {

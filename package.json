@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^12.0.5",
+    "@mediapipe/pose": "^0.4.1630009814",
     "@react-native-async-storage/async-storage": "^1.15.5",
     "@react-native-community/async-storage": "~1.12.0",
     "@react-native-community/masked-view": "0.1.10",
@@ -19,6 +20,7 @@
     "@rematch/core": "^1.4.0",
     "@rematch/loading": "^1.2.1",
     "@rematch/persist": "^1.1.6",
+    "@tensorflow-models/pose-detection": "^0.0.6",
     "@tensorflow-models/posenet": "^2.2.2",
     "@tensorflow/tfjs": "^3.8.0",
     "@tensorflow/tfjs-react-native": "^0.6.0",

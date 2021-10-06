@@ -34,22 +34,22 @@ export default class JointPair extends BaseAnalyzer {
 
     const j1Metric = jointPair.dimension == "x" ?
       {
-        j1: jp1Log.j1.position.x,
-        j2: jp1Log.j2.position.x,
+        j1: jp1Log.j1.x,
+        j2: jp1Log.j2.x,
       } :
       {
-        j1: jp1Log.j1.position.y,
-        j2: jp1Log.j2.position.y,
+        j1: jp1Log.j1.y,
+        j2: jp1Log.j2.y,
       };
 
     const j2Metric = jointPair.dimension == "x" ?
       {
-        j1: jp2Log.j1.position.x,
-        j2: jp2Log.j2.position.x,
+        j1: jp2Log.j1.x,
+        j2: jp2Log.j2.x,
       } :
       {
-        j1: jp2Log.j1.position.y,
-        j2: jp2Log.j2.position.y,
+        j1: jp2Log.j1.y,
+        j2: jp2Log.j2.y,
       };
 
     // comparison matrix: super confusing!

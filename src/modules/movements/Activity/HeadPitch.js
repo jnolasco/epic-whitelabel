@@ -41,7 +41,7 @@ const REQUIRED_JOINTS = [
 
 const TELEMETRY_ORIENTATION = Orientation.PORTRAIT;
 const UI_ORIENTATION = Orientation.PORTRAIT;
-const MOVEMENT_NAME = "Head Nod";
+const MOVEMENT_NAME = "Cervical Flexion and Extension";
 const MOVEMENT_TYPE = MovementTypes.BENCHMARK_POSE;
 const MIN_COMPRESSION_RATIO = 0.6;
 const MIN_EXPANSION_RATIO = 0.85;
@@ -58,7 +58,7 @@ export default class HeadPitch extends BaseMovement {
   constructor(telemetry, renderer, requirements, onPhaseChange = null) {
     super(telemetry, renderer, requirements, onPhaseChange, REQUIRED_JOINTS, MOVEMENT_TYPE);
     this.states = this.buildStates();
-    this.readyDescription =  "Position your head and shoulders facing forward in the camera."
+    this.readyDescription = "Position your head and shoulders facing forward in the camera."
     this.gauges = [
       "VBarGauge"
     ];
@@ -152,7 +152,7 @@ export default class HeadPitch extends BaseMovement {
     this.addMsg(stats.bestEyeline.name + " level? " + (Math.round(stats.bestEyelineAngle) > -5 && Math.round(stats.bestEyelineAngle) < 5), "debug");
     this.addMsg(Math.round(stats.bestEyelineAngle), "debug");
 
-    return stats.isFacingFront && (Math.round(stats.bestEyelineAngle) > -5 && Math.round(stats.bestEyelineAngle) < 5);
+    return stats.isFacingFront && (Math.round(stats.bestEyelineAngle) > -10 && Math.round(stats.bestEyelineAngle) < 10);
   }
 
   checkReadyPositionExit() {
@@ -174,10 +174,10 @@ export default class HeadPitch extends BaseMovement {
 
     const nose = t.getJoint(Joints.NOSE);
     const isFacingFront = t.isFacingFront();
-    const noseToBestShoulder = bestShoulder.position.y - nose.position.y;
+    const noseToBestShoulder = bestShoulder.y - nose.y;
 
     const bestEyelineAngle = (bestEyeline === Segments.LEFT_EYELINE) ?
-      -90 + Math.abs(t.getSegmentAngle(bestEyeline)):
+      -90 + Math.abs(t.getSegmentAngle(bestEyeline)) :
       -90 + Math.abs(t.getSegmentAngle(bestEyeline));
 
     const result = {
@@ -218,6 +218,9 @@ export default class HeadPitch extends BaseMovement {
           const stats = this._getStats();
           if (stats.bestEyelineAngle > -10) {
             this.globals.timer = Date.now();
+            if (this.isTicking) this.toggleTicking(false);
+          } else {
+            if (!this.isTicking) this.toggleTicking(true);
           }
 
 
@@ -231,7 +234,7 @@ export default class HeadPitch extends BaseMovement {
           return (Date.now() - this.globals.timer > holdTime) ? StateNames.RECENTER_FROM_DOWN : StateNames.TILT_DOWN;
         },
         onExit: () => {
-
+          this.toggleTicking(false);
         },
       },
       {
@@ -240,8 +243,7 @@ export default class HeadPitch extends BaseMovement {
         onEnter: () => {
           if (this.globals.totalProgress == 0) {
             this.coach(cues.firstCenter);
-          }
-          else {
+          } else {
             this.coach(cues.center);
           }
 
@@ -282,6 +284,9 @@ export default class HeadPitch extends BaseMovement {
           const stats = this._getStats();
           if (stats.bestEyelineAngle < 10) {
             this.globals.timer = Date.now();
+            if (this.isTicking) this.toggleTicking(false);
+          } else {
+            if (!this.isTicking) this.toggleTicking(true);
           }
           this.addMsg(((holdTime - (Date.now() - this.globals.timer)) / 1000).toFixed(1) + " sec");
           this.addMsg(Math.round(stats.bestEyelineAngle), "debug");
@@ -293,6 +298,7 @@ export default class HeadPitch extends BaseMovement {
         },
         onExit: () => {
           // nothing
+          this.toggleTicking(false);
         },
       },
       {
@@ -322,8 +328,7 @@ export default class HeadPitch extends BaseMovement {
               coachText += cues.down;
               this.coach(coachText, true);
               return StateNames.TILT_DOWN
-            }
-            else {
+            } else {
               return StateNames.END
             }
           } else {
